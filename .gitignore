@@ -11,6 +11,7 @@ temp_vids/
 temp_frames/
 dataset_to_label.csv
 dataset.csv
+training/raw_videos
 
 # --- ML Models & Weights ---
 # Florence-2 and SentenceTransformers can be large; usually kept in local cache
