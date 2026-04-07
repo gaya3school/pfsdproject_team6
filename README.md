@@ -1,3 +1,5 @@
+#1. create a .env in the project root folder
+
 ```env
 FLASK_APP=run_api.py
 FLASK_ENV=development
