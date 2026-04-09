@@ -10,6 +10,7 @@ from transformers import AutoProcessor, AutoModelForCausalLM
 from core.database import db_collection
 import yt_dlp
 
+from worker.dissonance_inference import get_dissonance_score
 
 # --- Helper Functions ---
 
@@ -141,6 +142,14 @@ def process_video_pipeline(youtube_url: str):
 
             current_float_embedding = embedder.encode(unified_text)
 
+            # --- Tri-Modal Dissonance Calculation ---
+            # We must embed the audio and visual separately to calculate the semantic gap
+            audio_float_vec = embedder.encode(frame_audio)
+            visual_float_vec = embedder.encode(visual_caption)
+
+            # Pass to your newly trained PyTorch model
+            calculated_dissonance = get_dissonance_score(audio_float_vec, visual_float_vec)
+
             # --- Visual Delta Thresholding & Graph Deduplication ---
             vector_to_store = None
             reference_id = None
@@ -170,7 +179,7 @@ def process_video_pipeline(youtube_url: str):
                 "audio_transcript": frame_audio,
                 "unified_text": unified_text,
                 "vector_int8": vector_to_store,
-                "dissonance_score": 0.0,  # Placeholder
+                "dissonance_score": calculated_dissonance,
                 "graph_edges": {
                     "prev_node_id": node_ids[i - 1] if i > 0 else None,
                     "next_node_id": node_ids[i + 1] if i < num_frames - 1 else None,

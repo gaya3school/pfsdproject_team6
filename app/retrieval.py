@@ -48,6 +48,7 @@ def query_video_graph(user_query: str, limit: int = 3):
                 "timestamp": 1,
                 "visual_caption": 1,
                 "audio_transcript": 1,
+                "dissonance_score": 1,
                 "search_score": {"$meta": "vectorSearchScore"},
                 # Sort prerequisites chronologically (deepest depth first)
                 "prerequisite_steps": {
