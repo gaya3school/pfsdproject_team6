@@ -3,103 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ODP-RAG | Non-Linear Video Knowledge Graph</title>
+    <title>ODP-RAG | Global Video Search</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --bg-dark: #0a0e1a;
             --bg-darker: #050810;
+            --bg-card: rgba(10, 16, 35, 0.85);
             --accent-cyan: #00fff5;
             --accent-magenta: #ff00e5;
             --accent-yellow: #ffed00;
-            --text-primary: #e0e0e0;
-            --text-secondary: #8f9bb3;
-            --border-glow: rgba(0, 255, 245, 0.3);
-            --card-bg: rgba(15, 23, 42, 0.7);
-            --grid-size: 20px;
+            --accent-orange: #ff6b35;
+            --text-primary: #e0e8ff;
+            --text-secondary: #6b7fa8;
+            --text-muted: #3d4f72;
+            --border-dim: rgba(0, 255, 245, 0.15);
+            --border-glow: rgba(0, 255, 245, 0.4);
+            --grid-size: 40px;
+            --warning-color: #ff9500;
+            --warning-bg: rgba(255, 149, 0, 0.12);
         }
 
         body {
             font-family: 'JetBrains Mono', monospace;
             background: var(--bg-dark);
             color: var(--text-primary);
+            min-height: 100vh;
             overflow-x: hidden;
-            position: relative;
         }
 
-        /* Animated grid background */
+        /* Grid background */
         body::before {
             content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 245, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 245, 0.03) 1px, transparent 1px);
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(0,255,245,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,245,0.025) 1px, transparent 1px);
             background-size: var(--grid-size) var(--grid-size);
-            animation: gridScroll 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
+            animation: gridMove 30s linear infinite;
+            pointer-events: none; z-index: 0;
         }
-
-        @keyframes gridScroll {
-            0% { transform: translate(0, 0); }
+        @keyframes gridMove {
+            0% { transform: translate(0,0); }
             100% { transform: translate(var(--grid-size), var(--grid-size)); }
         }
 
-        /* Scanline effect */
+        /* Scanlines */
         body::after {
             content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(0, 255, 245, 0.02) 50%
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 9999;
-            animation: scanline 8s linear infinite;
-        }
-
-        @keyframes scanline {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(4px); }
+            position: fixed; inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,245,0.012) 2px, rgba(0,255,245,0.012) 4px);
+            pointer-events: none; z-index: 9998;
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
-            position: relative;
-            z-index: 1;
+            position: relative; z-index: 1;
         }
 
-        /* Header */
+        /* HEADER */
         header {
-            text-align: center;
-            margin-bottom: 3rem;
-            position: relative;
-            padding: 2rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 0 2rem;
+            border-bottom: 1px solid var(--border-dim);
+            margin-bottom: 0;
         }
+
+        .header-brand { display: flex; align-items: baseline; gap: 1rem; }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 3.5rem;
+            font-size: 2rem;
             font-weight: 900;
             background: linear-gradient(135deg, #60a5fa, #a78bfa, #ec4899);
             -webkit-background-clip: text;
@@ -107,871 +89,1094 @@
             background-clip: text;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            margin-bottom: 0.5rem;
-            animation: glitchTitle 3s infinite;
-            text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+            animation: glitch 4s infinite;
         }
-
-        @keyframes glitchTitle {
-            0%, 90%, 100% { transform: translate(0); }
-            91% { transform: translate(-2px, 2px); }
-            92% { transform: translate(2px, -2px); }
-            93% { transform: translate(0); }
+        @keyframes glitch {
+            0%,88%,100% { transform: translate(0); }
+            90% { transform: translate(-2px, 1px); }
+            92% { transform: translate(2px, -1px); }
+            94% { transform: translate(0); }
         }
 
         .subtitle {
-            font-size: 0.9rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
-            letter-spacing: 0.3em;
+            letter-spacing: 0.25em;
             text-transform: uppercase;
         }
 
-        /* Input Section */
-        .input-section {
-            background: var(--card-bg);
-            border: 2px solid var(--border-glow);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 0 40px rgba(0, 255, 245, 0.1);
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .input-section::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--accent-cyan), var(--accent-magenta));
-            border-radius: 12px;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .input-section:hover::before {
-            opacity: 0.3;
-        }
-
-        .input-group {
+        /* Ingest button in header */
+        .ingest-trigger {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--accent-cyan);
-            border-radius: 8px;
-            padding: 1rem;
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent-magenta);
-            box-shadow: 0 0 20px rgba(255, 0, 229, 0.3);
-        }
-
-        input[type="text"]::placeholder {
-            color: var(--text-secondary);
-        }
-
-        button {
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
-            border: none;
-            border-radius: 8px;
-            padding: 1rem 2rem;
-            color: var(--bg-dark);
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        button:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 255, 245, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Status Messages */
-        .status {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            border-left: 4px solid;
-            animation: slideIn 0.3s;
-            display: none;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .status.processing {
-            background: rgba(0, 255, 245, 0.1);
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-            display: block;
-        }
-
-        .status.error {
-            background: rgba(255, 0, 0, 0.1);
-            border-color: #ff0033;
-            color: #ff6b6b;
-            display: block;
-        }
-
-        .status.success {
-            background: rgba(0, 255, 100, 0.1);
-            border-color: #00ff64;
-            color: #00ff64;
-            display: block;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--accent-cyan);
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 0.5rem;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Main Content Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        /* Video Player Section */
-        .video-section {
-            background: var(--card-bg);
-            border: 2px solid var(--border-glow);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 0 40px rgba(0, 255, 245, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .video-header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0, 255, 245, 0.2);
-        }
-
-        .video-header h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            gap: 0.6rem;
+            background: transparent;
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
             color: var(--accent-cyan);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.25s;
         }
-
-        .timestamp-display {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-yellow);
-            font-family: 'JetBrains Mono', monospace;
+        .ingest-trigger:hover {
+            background: rgba(0,255,245,0.08);
+            box-shadow: 0 0 20px rgba(0,255,245,0.2);
+            transform: translateY(-1px);
         }
+        .ingest-trigger svg { width: 16px; height: 16px; }
 
-        #videoPlayer {
-            width: 100%;
-            border-radius: 8px;
-            border: 2px solid rgba(0, 255, 245, 0.3);
-            background: #000;
-        }
-
-        .no-video {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: linear-gradient(135deg, rgba(0, 255, 245, 0.05), rgba(255, 0, 229, 0.05));
-            border-radius: 8px;
+        /* SEARCH LANDING */
+        .search-landing {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            border: 2px dashed rgba(0, 255, 245, 0.3);
+            padding: 5rem 0 3rem;
+            transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+        .search-landing.compact {
+            padding: 2rem 0 1.5rem;
         }
 
-        .no-video svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 1rem;
-            opacity: 0.4;
-        }
-
-        .no-video p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        /* Timeline Section */
-        .timeline-section {
-            background: var(--card-bg);
-            border: 2px solid var(--border-glow);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 0 40px rgba(0, 255, 245, 0.1);
-            backdrop-filter: blur(10px);
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .timeline-section h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            color: var(--accent-magenta);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Custom Scrollbar */
-        .timeline-section::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .timeline-section::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-        }
-
-        .timeline-section::-webkit-scrollbar-thumb {
-            background: var(--accent-cyan);
-            border-radius: 4px;
-        }
-
-        .timeline-section::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-magenta);
-        }
-
-        /* Timeline Items */
-        .timeline {
-            position: relative;
-            padding-left: 2rem;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-magenta));
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            border-left: 3px solid var(--accent-cyan);
-            cursor: pointer;
-            transition: all 0.3s;
-            animation: fadeInUp 0.5s backwards;
-        }
-
-        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
-        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
-        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
-        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
-        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -2.4rem;
-            top: 1.2rem;
-            width: 12px;
-            height: 12px;
-            background: var(--accent-cyan);
-            border-radius: 50%;
-            border: 2px solid var(--bg-dark);
-            box-shadow: 0 0 10px var(--accent-cyan);
-        }
-
-        .timeline-item:hover {
-            background: rgba(0, 255, 245, 0.1);
-            border-left-color: var(--accent-magenta);
-            transform: translateX(5px);
-        }
-
-        .timeline-item:hover::before {
-            background: var(--accent-magenta);
-            box-shadow: 0 0 15px var(--accent-magenta);
-        }
-
-        .timeline-item.current {
-            border-left-color: var(--accent-yellow);
-            background: rgba(255, 237, 0, 0.1);
-        }
-
-        .timeline-item.current::before {
-            background: var(--accent-yellow);
-            box-shadow: 0 0 20px var(--accent-yellow);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-        }
-
-        .step-number {
-            display: inline-block;
-            background: var(--accent-cyan);
-            color: var(--bg-dark);
+        .search-eyebrow {
             font-size: 0.7rem;
-            font-weight: 700;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-item.current .step-number {
-            background: var(--accent-yellow);
-        }
-
-        .step-timestamp {
-            color: var(--accent-cyan);
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-item.current .step-timestamp {
-            color: var(--accent-yellow);
-        }
-
-        .step-visual {
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            margin-bottom: 0.3rem;
-            line-height: 1.4;
-        }
-
-        .step-audio {
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
             color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-style: italic;
-            line-height: 1.4;
+            margin-bottom: 1.5rem;
+            opacity: 1;
+            transition: opacity 0.3s;
         }
+        .search-landing.compact .search-eyebrow { opacity: 0; height: 0; margin: 0; overflow: hidden; }
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state svg {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-
-        /* Results Section */
-        .results-section {
-            grid-column: 1 / -1;
-            background: var(--card-bg);
-            border: 2px solid var(--border-glow);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 0 40px rgba(0, 255, 245, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .results-section h2 {
+        .search-hero-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            color: var(--accent-cyan);
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-magenta) 60%, var(--accent-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            line-height: 1.1;
+            transition: all 0.4s;
+        }
+        .search-landing.compact .search-hero-title {
+            font-size: 0;
+            height: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .search-hero-sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            text-align: center;
+            transition: all 0.4s;
+        }
+        .search-landing.compact .search-hero-sub { font-size: 0; height: 0; margin: 0; overflow: hidden; }
+
+        /* Search bar */
+        .search-bar-wrap {
+            width: 100%;
+            max-width: 720px;
+            position: relative;
+        }
+
+        .search-bar-inner {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: rgba(5, 8, 16, 0.9);
+            border: 1.5px solid var(--border-glow);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0,255,245,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+            transition: box-shadow 0.3s, border-color 0.3s;
+            overflow: hidden;
+        }
+        .search-bar-inner:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 60px rgba(0,255,245,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .search-icon {
+            padding: 0 1rem 0 1.25rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        .search-icon svg { width: 20px; height: 20px; }
+
+        #searchQuery {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 1.1rem 0.5rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            caret-color: var(--accent-cyan);
+        }
+        #searchQuery::placeholder { color: var(--text-muted); }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            border: none;
+            padding: 0.85rem 1.75rem;
+            margin: 5px;
+            border-radius: 8px;
+            color: var(--bg-dark);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
+        .search-btn:hover { opacity: 0.88; transform: scale(1.02); }
+        .search-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-        .result-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(0, 255, 245, 0.2);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
+        .search-hint {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
+        .search-landing.compact .search-hint { display: none; }
 
-        .result-header {
+        /* INGEST MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(5, 8, 16, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid rgba(0, 255, 245, 0.1);
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
 
-        .dissonance-score {
-            background: linear-gradient(135deg, var(--accent-magenta), var(--accent-yellow));
-            padding: 0.4rem 0.8rem;
+        .modal {
+            background: #0a0e1a;
+            border: 1.5px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 540px;
+            box-shadow: 0 0 80px rgba(0,255,245,0.15);
+            transform: translateY(20px) scale(0.97);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
+        }
+        .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+        }
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+        .modal-close {
+            background: transparent;
+            border: 1px solid var(--border-dim);
             border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--bg-dark);
+            padding: 0.4rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+        }
+        .modal-close:hover { border-color: var(--accent-magenta); color: var(--accent-magenta); }
+        .modal-close svg { width: 16px; height: 16px; }
+
+        .modal-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
         }
 
-        .result-content {
-            display: grid;
+        .ingest-input-row {
+            display: flex;
             gap: 0.75rem;
         }
 
-        .result-row {
-            display: grid;
-            grid-template-columns: 120px 1fr;
-            gap: 1rem;
-        }
-
-        .result-label {
-            color: var(--accent-cyan);
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .result-value {
+        .ingest-input-row input {
+            flex: 1;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
             color: var(--text-primary);
-            font-size: 0.95rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .ingest-input-row input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 16px rgba(0,255,245,0.2);
+        }
+        .ingest-input-row input::placeholder { color: var(--text-muted); }
+
+        .ingest-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            border: none;
+            border-radius: 8px;
+            padding: 0.85rem 1.25rem;
+            color: var(--bg-dark);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .ingest-btn:hover { opacity: 0.85; }
+        .ingest-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── STATUS ── */
+        .status-bar {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            margin-top: 1rem;
+            border-left: 3px solid;
+            animation: slideIn 0.25s;
+        }
+        .status-bar.show { display: flex; }
+        .status-bar.processing { background: rgba(0,255,245,0.07); border-color: var(--accent-cyan); color: var(--accent-cyan); }
+        .status-bar.error { background: rgba(255,0,51,0.07); border-color: #ff0033; color: #ff6b6b; }
+        .status-bar.success { background: rgba(0,255,100,0.07); border-color: #00ff64; color: #00ff64; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .spinner {
+            width: 14px; height: 14px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* VIDEO CARD GALLERY */
+        .results-area { margin-top: 1rem; }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-dim);
+        }
+
+        .results-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--text-secondary);
+        }
+
+        .results-count {
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+        }
+
+        .video-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        /* VIDEO CARD */
+        .video-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
+            backdrop-filter: blur(12px);
+        }
+        .video-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 30px rgba(0,255,245,0.1), 0 8px 32px rgba(0,0,0,0.4);
+            transform: translateY(-3px);
+        }
+        .video-card.expanded {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 40px rgba(0,255,245,0.18);
+        }
+        .video-card.rank-1 { border-color: rgba(255,237,0,0.4); }
+        .video-card.rank-1:hover, .video-card.rank-1.expanded { border-color: var(--accent-yellow); box-shadow: 0 0 40px rgba(255,237,0,0.18); }
+
+        /* Rank badge */
+        .rank-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .rank-1 .rank-badge { background: var(--accent-yellow); color: #0a0e1a; }
+        .rank-2 .rank-badge { background: #c0c0c0; color: #0a0e1a; }
+        .rank-3 .rank-badge { background: #cd7f32; color: #0a0e1a; }
+        .rank-4 .rank-badge, .rank-5 .rank-badge { background: rgba(0,255,245,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }
+
+        .card-main { padding: 1.25rem; }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.9rem;
+        }
+
+        /* Thumbnail placeholder with gradient */
+        .card-thumb {
+            width: 80px; height: 54px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(0,255,245,0.08), rgba(255,0,229,0.08));
+            border: 1px solid var(--border-dim);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .card-thumb svg { width: 24px; height: 24px; color: var(--text-muted); }
+
+        .card-info { flex: 1; min-width: 0; }
+
+        .card-video-id {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.3rem;
+        }
+
+        .card-score-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .score-pill {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            color: var(--bg-dark);
+        }
+
+        .match-count {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        /* Key moment preview */
+        .key-moment {
+            background: rgba(0,0,0,0.35);
+            border-radius: 8px;
+            padding: 0.8rem;
+            border-left: 3px solid var(--accent-cyan);
+        }
+        .rank-1 .key-moment { border-left-color: var(--accent-yellow); }
+
+        .key-moment-label {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+
+        .key-moment-ts {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 0.35rem;
+        }
+        .rank-1 .key-moment-ts { color: var(--accent-yellow); }
+
+        .key-moment-caption {
+            font-size: 0.82rem;
+            color: var(--text-primary);
             line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
+        /* Dissonance warning */
+        .dissonance-warning {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.65rem;
+            color: var(--warning-color);
+            background: var(--warning-bg);
+            border: 1px solid rgba(255,149,0,0.3);
+            border-radius: 4px;
+            padding: 0.15rem 0.45rem;
+            margin-top: 0.4rem;
+        }
+        .dissonance-warning svg { width: 11px; height: 11px; flex-shrink: 0; }
 
-            .timeline-section {
-                max-height: 400px;
-            }
+        /* Card expand toggle */
+        .card-expand-btn {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-top: 1px solid var(--border-dim);
+            padding: 0.65rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .card-expand-btn:hover { background: rgba(0,255,245,0.04); color: var(--accent-cyan); }
+
+        .expand-arrow {
+            transition: transform 0.3s;
+        }
+        .expanded .expand-arrow { transform: rotate(180deg); }
+
+        /* ── DRILL-DOWN / EXPANDED PANEL ── */
+        .card-detail {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+        }
+        .card-detail.open { max-height: 1200px; }
+
+        .detail-inner {
+            border-top: 1px solid var(--border-dim);
+            padding: 1.25rem;
         }
 
+        /* Video player in card */
+        .card-player {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-dim);
+            margin-bottom: 1.25rem;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+        .card-player iframe { width: 100%; height: 100%; border: none; }
+        .card-player-placeholder {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .card-player-placeholder svg { width: 40px; height: 40px; opacity: 0.3; }
+
+        /* Timeline strip */
+        .timeline-strip {
+            margin-bottom: 1.25rem;
+        }
+        .timeline-strip-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .timeline-track {
+            position: relative;
+            height: 4px;
+            background: rgba(0,255,245,0.1);
+            border-radius: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-dark);
+            cursor: pointer;
+            transition: transform 0.2s;
+            z-index: 2;
+        }
+        .timeline-marker:hover { transform: translate(-50%, -50%) scale(1.4); }
+        .timeline-marker.is-current { background: var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow); }
+        .timeline-marker.is-step { background: var(--accent-cyan); box-shadow: 0 0 6px var(--accent-cyan); }
+        .timeline-marker.has-dissonance { background: var(--warning-color); box-shadow: 0 0 6px var(--warning-color); }
+
+        /* Prerequisite steps */
+        .prereq-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+        .prereq-section-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .prereq-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-dim);
+        }
+
+        .prereq-step {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(0,0,0,0.25);
+            border-radius: 7px;
+            border-left: 2px solid var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .prereq-step:hover { background: rgba(0,255,245,0.06); transform: translateX(3px); }
+        .prereq-step.is-current-step { border-left-color: var(--accent-yellow); background: rgba(255,237,0,0.06); }
+
+        .step-ts-col {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            white-space: nowrap;
+            padding-top: 1px;
+            flex-shrink: 0;
+        }
+        .prereq-step.is-current-step .step-ts-col { color: var(--accent-yellow); }
+
+        .step-body-col { flex: 1; min-width: 0; }
+
+        .step-num-badge {
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            display: inline-block;
+            margin-bottom: 0.35rem;
+        }
+        .prereq-step.is-current-step .step-num-badge { background: var(--accent-yellow); }
+
+        .step-visual-text {
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .step-audio-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.4;
+            margin-top: 0.25rem;
+        }
+
+        /* Dissonance inline badge */
+        .step-dissonance {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.6rem;
+            color: var(--warning-color);
+            background: var(--warning-bg);
+            border: 1px solid rgba(255,149,0,0.3);
+            border-radius: 3px;
+            padding: 0.1rem 0.3rem;
+        }
+        .step-dissonance svg { width: 9px; height: 9px; }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-muted);
+        }
+        .empty-state svg { width: 64px; height: 64px; margin-bottom: 1rem; opacity: 0.2; }
+        .empty-state p { font-size: 0.85rem; line-height: 1.7; }
+        .empty-state span { display: block; font-size: 0.72rem; margin-top: 0.5rem; }
+
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .input-group {
-                flex-direction: column;
-            }
-
-            button {
-                width: 100%;
-            }
-
-            .result-row {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
-            }
-
-            .container {
-                padding: 1rem;
-            }
+            .container { padding: 1rem; }
+            .search-hero-title { font-size: 2rem; }
+            .video-gallery { grid-template-columns: 1fr; }
+            header { flex-wrap: wrap; gap: 1rem; }
+            .ingest-input-row { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
+<div class="container">
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-brand">
             <h1>ODP-RAG</h1>
-            <p class="subtitle">Non-Linear Video Knowledge Graph</p>
-        </header>
+            <p class="subtitle">Global Video Search</p>
+        </div>
+        <button class="ingest-trigger" onclick="openIngestModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Video
+        </button>
+    </header>
 
-        <div class="input-section">
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    id="videoUrl" 
-                    placeholder="https://www.youtube.com/watch?v=..."
-                >
-                <button id="processBtn">Process Video</button>
-            </div>
-            
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    id="searchQuery" 
-                    placeholder="Search: 'How do I tighten the bolt?' or 'What are Python lists?'"
-                >
-                <button id="searchBtn">Search</button>
-            </div>
+    <!-- SEARCH LANDING -->
+    <div class="search-landing" id="searchLanding">
+        <div class="search-eyebrow">Knowledge Graph · Semantic Retrieval</div>
+        <h2 class="search-hero-title">Search Your<br>Video Library</h2>
+        <p class="search-hero-sub">Find moments across all ingested videos — timestamped &amp; context-aware.</p>
 
-            <div id="statusMessage" class="status"></div>
+        <div class="search-bar-wrap">
+            <div class="search-bar-inner">
+                <span class="search-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </span>
+                <input type="text" id="searchQuery" placeholder="Search your video library..." autocomplete="off" spellcheck="false">
+                <button class="search-btn" id="searchBtn">Search</button>
+            </div>
+            <p class="search-hint">Try: "How do I connect the wires?" · "What is gradient descent?" · "Setup the development environment"</p>
         </div>
 
-        <div class="content-grid">
-            <div class="video-section">
-                <div class="video-header">
-                    <h2>Video Player</h2>
-                    <div class="timestamp-display" id="currentTimestamp">--:--</div>
-                </div>
-                <div id="videoContainer">
-                    <div class="no-video">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                        <p>Process a video to begin</p>
-                    </div>
-                </div>
-            </div>
+        <div class="status-bar" id="searchStatus"></div>
+    </div>
 
-            <div class="timeline-section">
-                <h2>Prerequisite Timeline</h2>
-                <div id="timeline">
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        <p>Search to see prerequisite steps</p>
-                    </div>
-                </div>
-            </div>
+    <!-- RESULTS AREA -->
+    <div class="results-area" id="resultsArea" style="display:none">
+        <div class="results-header">
+            <span class="results-label">Most Relevant Videos</span>
+            <span class="results-count" id="resultsCountLabel"></span>
         </div>
+        <div class="video-gallery" id="videoGallery"></div>
+    </div>
 
-        <div class="results-section" id="resultsSection" style="display: none;">
-            <h2>Search Results</h2>
-            <div id="resultsContainer"></div>
+    <!-- INITIAL EMPTY STATE -->
+    <div id="emptyState" style="display:none">
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p>No results found for your query.<span>Try different keywords or check that videos have been ingested.</span></p>
         </div>
     </div>
 
-    <script>
-        const API_BASE = 'http://localhost:5000/api';
-        let currentVideoId = null;
+</div>
 
-        // Helper: Format seconds to MM:SS
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
+<!-- INGEST MODAL -->
+<div class="modal-overlay" id="ingestModal" onclick="handleModalClick(event)">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Ingest Video</span>
+            <button class="modal-close" onclick="closeIngestModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <p class="modal-desc">Paste a YouTube URL to process and ingest it into the knowledge graph. The AI will extract visual frames, transcribe audio, and build the prerequisite graph.</p>
+        <div class="ingest-input-row">
+            <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+            <button class="ingest-btn" id="ingestBtn">Ingest</button>
+        </div>
+        <div class="status-bar" id="ingestStatus" style="margin-top:0.75rem"></div>
+    </div>
+</div>
 
-        // Helper: Show status message
-        function showStatus(message, type = 'processing') {
-            const status = document.getElementById('statusMessage');
-            status.className = `status ${type}`;
-            status.innerHTML = type === 'processing' 
-                ? `<span class="spinner"></span>${message}`
-                : message;
-        }
+<script>
+    const API_BASE = 'http://localhost:5000/api';
 
-        // Helper: Hide status message
-        function hideStatus() {
-            document.getElementById('statusMessage').style.display = 'none';
-        }
+    // Helpers
+    function formatTime(s) {
+        if (s == null || isNaN(s)) return '--:--';
+        const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+        return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    }
 
-        // Extract YouTube video ID from URL
-        function extractVideoId(url) {
-            const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/;
-            const match = url.match(regex);
-            return match ? match[1] : null;
-        }
+    function extractVideoId(url) {
+        const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+        return m ? m[1] : null;
+    }
 
-        // Process Video
-        document.getElementById('processBtn').addEventListener('click', async () => {
-            const url = document.getElementById('videoUrl').value.trim();
-            
-            if (!url) {
-                showStatus('Please enter a YouTube URL', 'error');
-                return;
-            }
+    function showStatus(id, msg, type) {
+        const el = document.getElementById(id);
+        el.className = `status-bar show ${type}`;
+        el.innerHTML = type === 'processing'
+            ? `<span class="spinner"></span><span>${msg}</span>`
+            : msg;
+    }
+    function hideStatus(id) {
+        document.getElementById(id).className = 'status-bar';
+    }
 
-            const videoId = extractVideoId(url);
-            if (!videoId) {
-                showStatus('Invalid YouTube URL', 'error');
-                return;
-            }
+    // Dissonance threshold for warning icon
+    const DISSONANCE_THRESHOLD = 0.5;
 
-            showStatus('AI is analyzing the video... this may take a few minutes.', 'processing');
-            document.getElementById('processBtn').disabled = true;
+    function dissonanceWarningHTML(score) {
+        if (score == null || score < DISSONANCE_THRESHOLD) return '';
+        return `
+            <span class="dissonance-warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                AV mismatch (${(score*100).toFixed(0)}%)
+            </span>`;
+    }
 
-            try {
-                const response = await fetch(`${API_BASE}/ingest`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
+    // Modal
+    function openIngestModal() {
+        document.getElementById('ingestModal').classList.add('open');
+    }
+    function closeIngestModal() {
+        document.getElementById('ingestModal').classList.remove('open');
+        hideStatus('ingestStatus');
+        document.getElementById('videoUrl').value = '';
+    }
+    function handleModalClick(e) {
+        if (e.target === document.getElementById('ingestModal')) closeIngestModal();
+    }
 
-                const data = await response.json();
+    document.getElementById('ingestBtn').addEventListener('click', async () => {
+        const url = document.getElementById('videoUrl').value.trim();
+        if (!url) { showStatus('ingestStatus','Please enter a YouTube URL','error'); return; }
+        const videoId = extractVideoId(url);
+        if (!videoId) { showStatus('ingestStatus','Invalid YouTube URL','error'); return; }
 
-                if (response.ok) {
-                    currentVideoId = videoId;
-                    showStatus(`✓ ${data.message} (Task ID: ${data.task_id})`, 'success');
-                    loadVideo(videoId);
-                } else {
-                    showStatus(`Error: ${data.error || 'Failed to process video'}`, 'error');
-                }
-            } catch (error) {
-                showStatus(`Network error: ${error.message}`, 'error');
-            } finally {
-                document.getElementById('processBtn').disabled = false;
-            }
-        });
+        showStatus('ingestStatus','Processing video — this may take a few minutes...','processing');
+        document.getElementById('ingestBtn').disabled = true;
 
-        // Load YouTube video
-        function loadVideo(videoId) {
-            const container = document.getElementById('videoContainer');
-            container.innerHTML = `
-                <iframe 
-                    id="videoPlayer"
-                    src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-                </iframe>
-            `;
-        }
-
-        // Search Query
-        document.getElementById('searchBtn').addEventListener('click', async () => {
-            const query = document.getElementById('searchQuery').value.trim();
-            
-            if (!query) {
-                showStatus('Please enter a search query', 'error');
-                return;
-            }
-
-            showStatus('Searching through video knowledge graph...', 'processing');
-            document.getElementById('searchBtn').disabled = true;
-
-            try {
-                const response = await fetch(`${API_BASE}/query`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query, limit: 1 })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.data && data.data.length > 0) {
-                    const result = data.data[0];
-                    showStatus(`✓ Found ${data.results_count} result(s)`, 'success');
-                    
-                    // Update video timestamp
-                    updateVideoTimestamp(result.timestamp);
-                    
-                    // Render timeline
-                    renderTimeline(result);
-                    
-                    // Show results
-                    renderResults(data);
-                } else {
-                    showStatus('No results found', 'error');
-                    clearTimeline();
-                }
-            } catch (error) {
-                showStatus(`Network error: ${error.message}`, 'error');
-            } finally {
-                document.getElementById('searchBtn').disabled = false;
-            }
-        });
-
-        // Update video timestamp
-        function updateVideoTimestamp(timestamp) {
-            const timeDisplay = document.getElementById('currentTimestamp');
-            timeDisplay.textContent = formatTime(timestamp);
-            
-            // Update iframe src with timestamp
-            if (currentVideoId) {
-                const iframe = document.getElementById('videoPlayer');
-                if (iframe) {
-                    iframe.src = `https://www.youtube.com/embed/${currentVideoId}?start=${Math.floor(timestamp)}&autoplay=1&enablejsapi=1`;
-                }
-            }
-        }
-
-        // Render timeline
-        function renderTimeline(result) {
-            const timeline = document.getElementById('timeline');
-            const steps = result.prerequisite_steps || [];
-            
-            // Sort by steps_backward (descending) for chronological order
-            const sortedSteps = [...steps].sort((a, b) => b.steps_backward - a.steps_backward);
-            
-            let html = '';
-            
-            // Add prerequisite steps
-            sortedSteps.forEach((step, index) => {
-                html += `
-                    <div class="timeline-item" onclick="jumpToTimestamp(${step.timestamp})">
-                        <div class="step-number">STEP ${sortedSteps.length - index}</div>
-                        <div class="step-timestamp">${formatTime(step.timestamp)}</div>
-                        <div class="step-visual">${step.visual_caption}</div>
-                        ${step.audio_transcript && step.audio_transcript !== '[SILENCE]' 
-                            ? `<div class="step-audio">"${step.audio_transcript}"</div>` 
-                            : ''}
-                    </div>
-                `;
+        try {
+            const res = await fetch(`${API_BASE}/ingest`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
             });
-            
-            // Add current step
-            html += `
-                <div class="timeline-item current" onclick="jumpToTimestamp(${result.timestamp})">
-                    <div class="step-number">CURRENT</div>
-                    <div class="step-timestamp">${formatTime(result.timestamp)}</div>
-                    <div class="step-visual">${result.visual_caption}</div>
-                    ${result.audio_transcript && result.audio_transcript !== '[SILENCE]' 
-                        ? `<div class="step-audio">"${result.audio_transcript}"</div>` 
-                        : ''}
-                </div>
-            `;
-            
-            timeline.innerHTML = html;
+            const data = await res.json();
+            if (res.ok) {
+                showStatus('ingestStatus', `✓ ${data.message || 'Video queued successfully'} (Task: ${data.task_id || '—'})`, 'success');
+            } else {
+                showStatus('ingestStatus', `Error: ${data.error || 'Failed to process video'}`, 'error');
+            }
+        } catch (err) {
+            showStatus('ingestStatus', `Network error: ${err.message}`, 'error');
+        } finally {
+            document.getElementById('ingestBtn').disabled = false;
         }
+    });
 
-        // Clear timeline
-        function clearTimeline() {
-            const timeline = document.getElementById('timeline');
-            timeline.innerHTML = `
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
+    document.getElementById('videoUrl').addEventListener('keypress', e => {
+        if (e.key === 'Enter') document.getElementById('ingestBtn').click();
+    });
+
+    // Search
+    document.getElementById('searchBtn').addEventListener('click', doSearch);
+    document.getElementById('searchQuery').addEventListener('keypress', e => {
+        if (e.key === 'Enter') doSearch();
+    });
+
+    async function doSearch() {
+        const query = document.getElementById('searchQuery').value.trim();
+        if (!query) { showStatus('searchStatus','Please enter a search query','error'); return; }
+
+        // Compact the landing hero
+        document.getElementById('searchLanding').classList.add('compact');
+        showStatus('searchStatus','Searching knowledge graph...','processing');
+        document.getElementById('searchBtn').disabled = true;
+        document.getElementById('resultsArea').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'none';
+
+        try {
+            const res = await fetch(`${API_BASE}/query`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, limit: 20 })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.data && data.data.length > 0) {
+                hideStatus('searchStatus');
+                renderGallery(data.data);
+            } else {
+                hideStatus('searchStatus');
+                document.getElementById('emptyState').style.display = 'block';
+            }
+        } catch (err) {
+            showStatus('searchStatus', `Network error: ${err.message}`, 'error');
+        } finally {
+            document.getElementById('searchBtn').disabled = false;
+        }
+    }
+
+    // Group & rank by video_id
+    function groupByVideo(nodes) {
+        const map = {};
+        nodes.forEach(node => {
+            const vid = node.video_id || 'unknown';
+            if (!map[vid]) map[vid] = { video_id: vid, nodes: [], best_score: 0, best_node: null };
+            map[vid].nodes.push(node);
+            const score = node.search_score ?? node.score ?? 0;
+            if (score > map[vid].best_score) {
+                map[vid].best_score = score;
+                map[vid].best_node = node;
+            }
+        });
+        return Object.values(map)
+            .sort((a, b) => b.best_score - a.best_score)
+            .slice(0, 5);
+    }
+
+    //  Render Gallery
+    function renderGallery(nodes) {
+        const groups = groupByVideo(nodes);
+        const gallery = document.getElementById('videoGallery');
+        const countLabel = document.getElementById('resultsCountLabel');
+
+        countLabel.textContent = `Top ${groups.length} video${groups.length !== 1 ? 's' : ''} · ${nodes.length} moments`;
+
+        gallery.innerHTML = groups.map((grp, i) => buildCard(grp, i + 1)).join('');
+        document.getElementById('resultsArea').style.display = 'block';
+    }
+
+    function buildCard(grp, rank) {
+        const { video_id, nodes, best_score, best_node } = grp;
+        const scoreDisplay = best_score > 0 ? `${(best_score * 100).toFixed(1)}%` : '—';
+        const caption = best_node?.visual_caption || best_node?.audio_transcript || 'No caption available';
+        const ts = best_node?.timestamp;
+        const dissonance = best_node?.dissonance_score;
+        const ytId = extractVideoId(video_id) || video_id;
+
+        return `
+        <div class="video-card rank-${rank}" id="card-${ytId}" data-ytid="${ytId}" data-expanded="false">
+            <span class="rank-badge">#${rank}</span>
+            <div class="card-main">
+                <div class="card-top">
+                    <div class="card-thumb">
+                        <img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                             alt="thumbnail" loading="lazy">
+                        <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-video-id" title="${video_id}">${video_id}</div>
+                        <div class="card-score-row">
+                            <span class="score-pill">${scoreDisplay}</span>
+                            <span class="match-count">${nodes.length} moment${nodes.length !== 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="key-moment">
+                    <div class="key-moment-label">Key Moment</div>
+                    <div class="key-moment-ts">${formatTime(ts)}</div>
+                    <div class="key-moment-caption">${caption}</div>
+                    ${dissonanceWarningHTML(dissonance)}
+                </div>
+            </div>
+            <button class="card-expand-btn" onclick="toggleCard('${ytId}', ${JSON.stringify(grp).replace(/'/g,"&#39;")})">
+                <span>Prerequisite Steps &amp; Timeline</span>
+                <svg class="expand-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="card-detail" id="detail-${ytId}">
+                <div class="detail-inner" id="detail-inner-${ytId}">
+                    <div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.8rem;">Loading...</div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // Toggle card expansion
+    const renderedCards = new Set();
+
+    function toggleCard(ytId, grp) {
+        const card = document.getElementById(`card-${ytId}`);
+        const detail = document.getElementById(`detail-${ytId}`);
+        const isOpen = detail.classList.contains('open');
+
+        if (isOpen) {
+            detail.classList.remove('open');
+            card.classList.remove('expanded');
+            card.dataset.expanded = 'false';
+        } else {
+            detail.classList.add('open');
+            card.classList.add('expanded');
+            card.dataset.expanded = 'true';
+            if (!renderedCards.has(ytId)) {
+                renderedCards.add(ytId);
+                renderCardDetail(ytId, grp);
+            }
+        }
+    }
+
+    function renderCardDetail(ytId, grp) {
+        const inner = document.getElementById(`detail-inner-${ytId}`);
+        const { nodes, best_node } = grp;
+
+        // Build timeline data: all nodes + their prerequisite steps (deduplicated by timestamp)
+        const allMoments = [];
+        const seen = new Set();
+        nodes.forEach(n => {
+            const key = n.timestamp;
+            if (!seen.has(key)) { seen.add(key); allMoments.push({ ...n, _isBest: n === best_node }); }
+            (n.prerequisite_steps || []).forEach(s => {
+                const sk = s.timestamp;
+                if (!seen.has(sk)) { seen.add(sk); allMoments.push({ ...s, _isPrereq: true }); }
+            });
+        });
+        allMoments.sort((a, b) => a.timestamp - b.timestamp);
+
+        const maxTs = Math.max(...allMoments.map(m => m.timestamp), 1);
+
+        // Timeline markers
+        const markers = allMoments.map(m => {
+            const pct = (m.timestamp / maxTs * 100).toFixed(2);
+            const cls = m._isBest ? 'is-current' : m.has_dissonance || (m.dissonance_score >= DISSONANCE_THRESHOLD) ? 'has-dissonance' : 'is-step';
+            return `<div class="timeline-marker ${cls}" style="left:${pct}%"
+                        title="${formatTime(m.timestamp)}"
+                        onclick="jumpInCard('${ytId}', ${Math.floor(m.timestamp)})"></div>`;
+        }).join('');
+
+        // Prerequisite steps for best node
+        const bestSteps = (best_node?.prerequisite_steps || [])
+            .slice().sort((a, b) => b.steps_backward - a.steps_backward);
+
+        const stepsHTML = bestSteps.length === 0
+            ? `<p style="font-size:0.8rem;color:var(--text-muted)">No prerequisite steps found.</p>`
+            : bestSteps.map((step, i) => {
+                const stepNum = bestSteps.length - i;
+                const dis = step.dissonance_score;
+                const disHTML = dis != null && dis >= DISSONANCE_THRESHOLD
+                    ? `<span class="step-dissonance">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                            AV ${(dis*100).toFixed(0)}%
+                        </span>`
+                    : '';
+                return `
+                <div class="prereq-step" onclick="jumpInCard('${ytId}', ${Math.floor(step.timestamp)})">
+                    ${disHTML}
+                    <div class="step-ts-col">${formatTime(step.timestamp)}</div>
+                    <div class="step-body-col">
+                        <span class="step-num-badge">STEP ${stepNum}</span>
+                        <div class="step-visual-text">${step.visual_caption || '—'}</div>
+                        ${step.audio_transcript && step.audio_transcript !== '[SILENCE]'
+                            ? `<div class="step-audio-text">"${step.audio_transcript}"</div>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+
+        // Current result step
+        const currentStepHTML = `
+            <div class="prereq-step is-current-step" onclick="jumpInCard('${ytId}', ${Math.floor(best_node?.timestamp || 0)})">
+                <div class="step-ts-col">${formatTime(best_node?.timestamp)}</div>
+                <div class="step-body-col">
+                    <span class="step-num-badge">ANSWER</span>
+                    <div class="step-visual-text">${best_node?.visual_caption || '—'}</div>
+                    ${best_node?.audio_transcript && best_node.audio_transcript !== '[SILENCE]'
+                        ? `<div class="step-audio-text">"${best_node.audio_transcript}"</div>` : ''}
+                </div>
+            </div>`;
+
+        inner.innerHTML = `
+            <div class="card-player" id="player-${ytId}">
+                <div class="card-player-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
                     </svg>
-                    <p>No results to display</p>
+                    <span>Click a step or marker to jump to timestamp</span>
                 </div>
-            `;
-        }
+            </div>
 
-        // Jump to timestamp
-        function jumpToTimestamp(timestamp) {
-            updateVideoTimestamp(timestamp);
-        }
+            <div class="timeline-strip">
+                <div class="timeline-strip-label">Timeline — ${allMoments.length} moment${allMoments.length !== 1 ? 's' : ''}</div>
+                <div class="timeline-track">${markers}</div>
+            </div>
 
-        // Render results section
-        function renderResults(data) {
-            const section = document.getElementById('resultsSection');
-            const container = document.getElementById('resultsContainer');
-            
-            let html = '';
-            data.data.forEach((result, index) => {
-                html += `
-                    <div class="result-card">
-                        <div class="result-header">
-                            <div class="step-timestamp">${formatTime(result.timestamp)}</div>
-                            <div class="dissonance-score">
-                                Relevance: ${(result.dissonance_score * 100).toFixed(0)}%
-                            </div>
-                        </div>
-                        <div class="result-content">
-                            <div class="result-row">
-                                <div class="result-label">Visual</div>
-                                <div class="result-value">${result.visual_caption}</div>
-                            </div>
-                            ${result.audio_transcript && result.audio_transcript !== '[SILENCE]' ? `
-                                <div class="result-row">
-                                    <div class="result-label">Audio</div>
-                                    <div class="result-value">"${result.audio_transcript}"</div>
-                                </div>
-                            ` : ''}
-                            ${result.prerequisite_steps && result.prerequisite_steps.length > 0 ? `
-                                <div class="result-row">
-                                    <div class="result-label">Prerequisites</div>
-                                    <div class="result-value">${result.prerequisite_steps.length} step(s)</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-            section.style.display = 'block';
-        }
+            <div class="prereq-section-label">Prerequisite Steps</div>
+            <div class="prereq-list">
+                ${stepsHTML}
+                ${currentStepHTML}
+            </div>`;
+    }
 
-        // Enable search on Enter key
-        document.getElementById('searchQuery').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('searchBtn').click();
-            }
-        });
-
-        // Enable process on Enter key
-        document.getElementById('videoUrl').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('processBtn').click();
-            }
-        });
-    </script>
+    function jumpInCard(ytId, startSec) {
+        const container = document.getElementById(`player-${ytId}`);
+        container.innerHTML = `
+            <iframe
+                src="https://www.youtube.com/embed/${ytId}?start=${startSec}&autoplay=1&enablejsapi=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>`;
+    }
+</script>
 </body>
 </html>
